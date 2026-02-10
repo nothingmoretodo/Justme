@@ -152,7 +152,7 @@
   leafGroup.setAttribute("fill", "#ff4d6d");
   svg.appendChild(leafGroup);
 
-  const HEART_COUNT = 140;
+  const HEART_COUNT = 1400;
   const leaves = [];
 
   for (let i = 0; i < HEART_COUNT; i++) {
@@ -164,8 +164,8 @@
     } while ((x*x + y*y - 1)**3 - x*x*y*y*y > 0);
 
     heart.setAttribute("href", "#heartShape");
-    heart.setAttribute("x", 2000 + x * 1190);
-    heart.setAttribute("y", 1600 + y * 900);
+    heart.setAttribute("x", 200 + x * 110);
+    heart.setAttribute("y", 160 + y * 90);
     heart.setAttribute("class", "heart");
     heart.style.animationDelay = (1.2 + Math.random() * 2.5) + "s";
     heart.style.transform = `scale(${0.6 + Math.random() * 0.8})`;
@@ -209,6 +209,7 @@
 
 </body>
 </html>
+
 
 
 
