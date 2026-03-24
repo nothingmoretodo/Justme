@@ -1,210 +1,157 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Be My Valentine?</title>
+    <title>Mini Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #000000, #1a1a2e);
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
 
-<style>
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to top, #ffe6f2, #fff0f5);
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-  }
+        #bgText {
+            position: absolute;
+            top: 40%;
+            width: 100%;
+            font-size: 40px;
+            opacity: 0.08;
+            letter-spacing: 2px;
+        }
 
-  .container { text-align: center; }
+        #player {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            font-size: 30px;
+        }
 
-  h1 {
-    color: #c92a4e;
-    font-size: 2rem;
-    margin: 10px 0 20px;
-    opacity: 0;
-    animation: fadeIn 2s forwards 2.5s;
-  }
+        .heart {
+            position: absolute;
+            font-size: 24px;
+        }
 
-  .buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    opacity: 0;
-    animation: fadeIn 2s forwards 3s;
-  }
+        .floatingText {
+            position: absolute;
+            font-size: 14px;
+            opacity: 0.4;
+        }
 
-  button {
-    padding: 12px 30px;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-  }
+        #endScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
 
-  #yes { background: #ff4d6d; color: white; }
-  #no  { background: white; color: #555; border: 2px solid #eee; }
-
-  svg { width: 380px; height: 450px; }
-
-  .trunk {
-    fill: #5d3a29;
-    transform-origin: bottom center;
-    animation: grow 1.5s ease-out forwards;
-  }
-
-  .branch {
-    fill: none;
-    stroke: #5d3a29;
-    stroke-linecap: round;
-    stroke-dasharray: 120;
-    stroke-dashoffset: 120;
-    animation: draw 1.5s ease-out forwards;
-  }
-
-  .heart {
-    opacity: 0;
-    transform-origin: center;
-    animation: pop 0.6s ease forwards, sway 3s ease-in-out infinite alternate;
-  }
-
-  /* Leaf shedding */
-  .fall {
-    animation: fall 2.5s ease-in forwards !important;
-  }
-
-  @keyframes fall {
-    to {
-      transform: translateY(220px) rotate(120deg) scale(0.6);
-      opacity: 0;
-    }
-  }
-
-  @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
-  @keyframes pop  { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  @keyframes sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-  @keyframes fadeIn { to { opacity: 1; } }
-
-  .floating {
-    position: fixed;
-    bottom: 0;
-    font-size: 2rem;
-    animation: floatUp 4s linear forwards;
-    pointer-events: none;
-  }
-
-  @keyframes floatUp {
-    to { transform: translateY(-100vh); opacity: 0; }
-  }
-
-  .hidden { display: none; }
-</style>
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #ff4d6d;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="container" id="main">
-  <svg id="treeSVG" viewBox="0 0 400 400">
-    <defs>
-      <path id="heartShape"
-        d="M0 0 C-6 -6 -12 0 -12 6 C-12 16 0 26 0 26 C0 26 12 16 12 6 C12 0 6 -6 0 0 Z" />
-    </defs>
+<div id="bgText">Grab my heart if you want me beside you</div>
 
-    <path class="trunk" d="M190 400 Q200 320 200 240 Q200 320 210 400 Z"/>
-  </svg>
+<h2 id="score">Score: 0</h2>
+<div id="player">😎</div>
 
-  <h1>Dear will you be my Valentine? ❤️</h1>
-
-  <div class="buttons">
-    <button id="yes" onclick="yes()">Yes</button>
-    <button id="no" onclick="no()">No</button>
-  </div>
-</div>
-
-<div class="container hidden" id="success">
-  <h1>💖 See you on Valentine’s Day mwuah 💖</h1>
+<div id="endScreen">
+    <h1 id="finalMsg"></h1>
+    <button onclick="location.reload()">Play Again</button>
 </div>
 
 <script>
-  const svg = document.getElementById("treeSVG");
+let player = document.getElementById("player");
+let scoreText = document.getElementById("score");
+let endScreen = document.getElementById("endScreen");
+let finalMsg = document.getElementById("finalMsg");
 
-  /* ---------- BRANCHES ---------- */
-  function addBranch() {
-    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const x = 200;
-    const y = 260 - Math.random() * 100;
-    const dir = Math.random() > 0.5 ? 1 : -1;
-    const len = 40 + Math.random() * 60;
+let score = 0;
+let playerX = window.innerWidth / 2;
 
-    p.setAttribute("d", `M ${x} ${y} Q ${x + dir*len/2} ${y-30} ${x + dir*len} ${y-60}`);
-    p.setAttribute("class", "branch");
-    p.setAttribute("stroke-width", 1 + Math.random()*1.5);
-    svg.appendChild(p);
-  }
-  for (let i = 0; i < 18; i++) addBranch();
+let messages = [
+    "This one felt like you 💖",
+    "Don't miss this 😌",
+    "Almost there...",
+    "You're doing better than expected",
+    "Careful… this matters 😉"
+];
 
-  /* ---------- LEAVES ---------- */
-  const leafGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  leafGroup.setAttribute("fill", "#ff4d6d");
-  svg.appendChild(leafGroup);
+document.addEventListener("mousemove", (e) => {
+    playerX = e.clientX;
+    player.style.left = playerX + "px";
+});
 
-  const HEART_COUNT = 1400;
-  const leaves = [];
+function createHeart() {
+    let heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerText = "💖";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.top = "0px";
+    document.body.appendChild(heart);
 
-  for (let i = 0; i < HEART_COUNT; i++) {
-    const heart = document.createElementNS("http://www.w3.org/2000/svg", "use");
-    let x, y;
-    do {
-      x = Math.random() * 2 - 1;
-      y = Math.random() * 2 - 1;
-    } while ((x*x + y*y - 1)**3 - x*x*y*y*y > 0);
+    // floating message
+    let text = document.createElement("div");
+    text.classList.add("floatingText");
+    text.innerText = messages[Math.floor(Math.random() * messages.length)];
+    text.style.left = heart.style.left;
+    text.style.top = "20px";
+    document.body.appendChild(text);
 
-    heart.setAttribute("href", "#heartShape");
-    heart.setAttribute("x", 200 + x * 110);
-    heart.setAttribute("y", 160 + y * 90);
-    heart.setAttribute("class", "heart");
-    heart.style.animationDelay = (1.2 + Math.random() * 2.5) + "s";
-    heart.style.transform = `scale(${0.6 + Math.random() * 0.8})`;
+    let fall = setInterval(() => {
+        let top = parseInt(heart.style.top);
+        heart.style.top = top + 5 + "px";
+        text.style.top = (top + 20) + "px";
 
-    leafGroup.appendChild(heart);
-    leaves.push(heart);
-  }
+        let heartX = heart.offsetLeft;
+        let playerRect = player.getBoundingClientRect();
 
-  /* ---------- BUTTON ACTIONS ---------- */
+        if (
+            heartX > playerRect.left &&
+            heartX < playerRect.right &&
+            top > window.innerHeight - 60
+        ) {
+            score++;
+            scoreText.innerText = "Score: " + score;
+            heart.remove();
+            text.remove();
+            clearInterval(fall);
+        }
 
-  function yes() {
-    document.getElementById("main").classList.add("hidden");
-    document.getElementById("success").classList.remove("hidden");
+        if (top > window.innerHeight) {
+            heart.remove();
+            text.remove();
+            clearInterval(fall);
+        }
+    }, 30);
+}
 
-    setInterval(() => {
-      for (let i = 0; i < 3; i++) {
-        const e = document.createElement("div");
-        e.className = "floating";
-        e.textContent = Math.random() > 0.5 ? "❤️" : "🌸";
-        e.style.left = Math.random() * 100 + "vw";
-        document.body.appendChild(e);
-        setTimeout(() => e.remove(), 4000);
-      }
-    }, 300);
-  }
+setInterval(createHeart, 800);
 
-  function no() {
-    leaves.forEach((leaf, i) => {
-      setTimeout(() => leaf.classList.add("fall"), i * 15);
-    });
+setTimeout(() => {
+    endScreen.style.display = "flex";
 
-    setTimeout(() => {
-  document.getElementById("main").innerHTML = `
-    <div style="font-size:5rem">🐻💔</div>
-    <h1>You did great.u are a fake friend 🖕</h1>
-  `;
-}, 2200);
-
-  }
+    if (score > 10) {
+        finalMsg.innerText = "You win… but you already had me 😏";
+    } else {
+        finalMsg.innerText = "Not bad… try again, I might still be yours 😉";
+    }
+}, 15000);
 </script>
 
 </body>
